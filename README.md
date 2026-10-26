@@ -1,256 +1,177 @@
-# 🌵 DroughtSense
-### A Machine Learning-Based Framework for Drought Prediction and Early Warning
-
-DroughtSense is a machine learning project designed to predict drought conditions using hydrological and meteorological data. It aims to estimate drought probability, classify drought severity, and provide early warnings to help communities and authorities prepare for water shortages.
-
-## 📌 Problem Statement
-
-Drought is a long period of low water availability caused by insufficient rainfall, high temperatures, increased evapotranspiration, and low soil moisture.
-
-It affects agriculture, groundwater, rivers, reservoirs, ecosystems, and drinking-water supplies. Traditional drought identification may happen after serious water stress has already developed.
-
-DroughtSense aims to identify possible drought conditions early using environmental data and machine learning techniques.
-
-## 🎯 Objectives
-
-- Collect historical hydrological and meteorological data.
-- Clean the dataset and handle missing values and outliers.
-- Analyze relationships between environmental variables.
-- Calculate SPI and SPEI drought indices.
-- Train machine learning models to predict drought conditions.
-- Estimate drought probability and classify drought severity.
-- Develop an early-warning dashboard for better water-resource management.
-
-## 🌦️ Data Sources and Features
-
-The project may use the following environmental variables, depending on data availability.
-
-**Hydrological Variables**
-- Rainfall or precipitation
-- Soil moisture
-- Streamflow
-- Groundwater levels
-- Reservoir and water-storage data
-
-**Meteorological Variables**
-- Minimum, maximum, and average temperature
-- Humidity
-- Wind speed
-- Evapotranspiration
-
-**Optional Environmental Variables**
-- Normalized Difference Vegetation Index (NDVI)
-- Land-use and land-cover data
-
-The dataset, data sources, geographic coverage, and time period will be documented during implementation.
-
-## 📉 Drought Assessment Using SPI and SPEI
-
-**1. Standardized Precipitation Index (SPI)**
-
-SPI measures variations in precipitation and helps identify meteorological drought over different time periods.
-
-**2. Standardized Precipitation Evapotranspiration Index (SPEI)**
-
-SPEI considers both precipitation and evapotranspiration. It helps assess drought conditions by considering water demand and temperature-related effects.
-
-Both indices are part of the proposed DroughtSense drought-assessment pipeline.
-
-## ⚙️ Proposed Machine Learning Workflow
-
-1. **Data Collection:** Collect historical environmental, hydrological, and meteorological data.
-2. **Data Cleaning:** Remove duplicate records and correct inconsistent data.
-3. **Missing Value and Outlier Treatment:** Handle missing observations and unusual values.
-4. **Exploratory Data Analysis:** Study data patterns, trends, and relationships.
-5. **Feature Engineering:** Prepare useful features and calculate SPI/SPEI where possible.
-6. **Model Training:** Train machine learning models using the prepared dataset.
-7. **Model Evaluation:** Compare model performance using suitable evaluation metrics.
-8. **Drought Prediction:** Estimate drought probability and classify severity.
-9. **Dashboard Development:** Display drought risk, environmental trends, and warning indicators.
-
-## 🤖 Machine Learning Models
-
-The following models are proposed for drought prediction.
-
-| Model | Purpose |
-|---|---|
-| Logistic Regression | Baseline model for drought classification |
-| Decision Tree | Identifies relationships between environmental variables |
-| Random Forest | Proposed primary model for robust classification and feature-importance analysis |
-| XGBoost | Provides an additional model for performance comparison |
-| LSTM | Optional model for time-series drought prediction |
-
-**Primary Model:** Random Forest is proposed as the main model. The final model will be selected after testing and comparing performance.
-
-## 📊 Model Evaluation
-
-The proposed models will be evaluated using:
-
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- AUC-ROC
-
-These metrics will help compare the models and understand their ability to identify drought conditions.
-
-## 📈 Proposed Early-Warning Dashboard
-
-The dashboard is planned to include the following features:
-
-- **Drought Probability:** Displays the predicted likelihood of drought as a percentage.
-- **Drought Severity:** Classifies conditions as Normal, Moderate, Severe, or Extreme.
-- **SPI/SPEI Status:** Displays drought index values and classifications.
-- **Rainfall Trend:** Shows historical and forecasted rainfall patterns when forecast data is available.
-- **Soil Moisture Status:** Displays current soil moisture levels and their variations.
-- **Temperature Trend:** Shows temperature changes compared with historical averages.
-- **Drought-Risk Map:** Displays drought risk across monitored regions when location-based data is available.
-- **Early-Warning Indicator:** Highlights possible drought conditions based on defined risk criteria.
-
-These are proposed features. Actual dashboard outputs will depend on implementation, available data, and model validation.
-
-## 🧰 Suggested Technology Stack
-
-The project proposal does not specify a final technology stack. The following tools are possible choices for implementation.
-
-- **Programming Language:** Python
-- **Data Processing:** Pandas, NumPy
-- **Data Visualization:** Matplotlib, Seaborn
-- **Machine Learning:** Scikit-learn
-- **Gradient Boosting:** XGBoost
-- **Deep Learning:** TensorFlow/Keras for optional LSTM implementation
-- **Dashboard:** Streamlit, Flask, or FastAPI
-
-The final tools should reflect the technologies actually used in the project.
-
-## 🚀 Installation and Setup
-
-Once the project code and dependencies are available, use the following commands as a starting point.
-
-```bash
-# Clone the repository
-git clone <your-repository-url>
-
-# Open the project folder
-cd <repository-folder>
-
-# Create a virtual environment
-python -m venv .venv
-```
-
-Activate the environment.
-
-**Windows:**
-```bash
-.venv\Scripts\activate
-```
-
-**macOS/Linux:**
-```bash
-source .venv/bin/activate
-```
-
-Install dependencies after creating the `requirements.txt` file.
-
-```bash
-pip install -r requirements.txt
-```
-
-The exact commands for training the model and launching the dashboard should be added once the implementation is finalized.
-
-## 📁 Project Structure
-
-A suggested project structure is shown below.
-
-```text
-DroughtSense/
-├── data/
-│   ├── raw/
-│   └── processed/
-├── notebooks/
-├── src/
-│   ├── data_preprocessing.py
-│   ├── drought_indices.py
-│   ├── train_model.py
-│   ├── evaluate_model.py
-│   └── predict.py
-├── dashboard/
-├── models/
-├── requirements.txt
-├── README.md
-└── .gitignore
-```
-
-This structure can be adjusted to match the actual project files.
-
-## 🌍 Applications
-
-DroughtSense may support:
-
-- Agricultural planning and crop management
-- Water-resource planning and allocation
-- Groundwater and reservoir conservation
-- Community drought early-warning systems
-- Disaster preparedness and response planning
-- Environmental monitoring and ecosystem protection
-
-## 🌱 Expected Impact
-
-The project aims to support earlier identification of drought risk and better preparation for water shortages.
-
-Potential benefits include:
-
-- Better agricultural planning
-- Improved water conservation
-- Reduced drought-related crop losses
-- Better preparedness for water shortages
-- Data-driven decisions by authorities and agricultural planners
-- Improved environmental protection
-
-DroughtSense is intended to support decision-making and should not replace official forecasts or emergency guidance.
-
-## 🔬 Validation and Responsible Use
-
-Before using the model for real-world decisions, the team should:
-
-- Verify the reliability and quality of the dataset.
-- Document data sources and coverage.
-- Prevent future information from leaking into training data.
-- Use appropriate training and testing methods for time-series data.
-- Compare models using suitable evaluation metrics.
-- Test performance across drought severity classes.
-- Define drought severity thresholds and alert rules.
-- Validate predictions before using them for operational decisions.
-
-## 👥 Team Members
-
-**Course:** EHDS-2026 Project 1
-
-| Team Member | Registration Number |
-|---|---|
-| Vyoam Joshi | RA2411056010048 |
-| Midhu John | RA2411026010534 |
-| Tilak | RA241103010556 |
-
-## 🗺️ Project Roadmap
-
-- [ ] Identify suitable data sources.
-- [ ] Collect and inspect environmental data.
-- [ ] Clean the dataset and handle missing values.
-- [ ] Calculate and validate SPI/SPEI.
-- [ ] Perform exploratory data analysis.
-- [ ] Train baseline machine learning models.
-- [ ] Train and compare candidate models.
-- [ ] Evaluate and document model performance.
-- [ ] Develop the early-warning dashboard.
-- [ ] Test drought-risk indicators and document the results.
-
-## 📄 Project Reference
-
-**Project Title:** DroughtSense: A Machine Learning-Based Framework for Drought Prediction and Early Warning Using Hydrological and Meteorological Data.
-
-**Course:** EHDS-2026 Project 1
+# DroughtSense: A Machine Learning-Based Framework for Drought Prediction and Early Warning
+
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-teal.svg)](https://fastapi.tiangolo.com)
+[![React 19](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6.0+-purple.svg)](https://vitejs.dev/)
+[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind-v4-38bdf8.svg)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+**Course:** EHDS-2026 Project 1  
+**Team Members:**
+- **Vyoam Joshi** &mdash; `RA2411056010048`
+- **Midhu John** &mdash; `RA2411026010534`
+- **Tilak** &mdash; `RA241103010556`
 
 ---
 
-*DroughtSense aims to turn environmental data into useful signals for earlier drought-risk identification and improved water-resource management.*
+## 1. Project Overview
+
+**DroughtSense** is an environmental monitoring and machine learning platform that utilizes hydrological and meteorological observations to estimate drought probability, classify severity into WMO-standard categories, visualize spatial risk, and trigger early warnings.
+
+The platform provides a functional end-to-end pipeline:
+1. **Data Ingestion & Quality Control:** Automated column detection, type verification, duplicate removal, outlier screening, and CSV formula injection protection.
+2. **Standardized Drought Indices:** Statistically robust calculations for the **Standardized Precipitation Index (SPI)** and **Standardized Precipitation Evapotranspiration Index (SPEI)** with zero-rainfall adjustments.
+3. **Machine Learning Ensembles:** Date-based chronological training (preventing temporal data leakage) across **Random Forest** (primary proposed model), **XGBoost**, **Decision Trees**, and **Logistic Regression**.
+4. **Early-Warning Engine:** Multi-criteria rule engine mapping probability, SPI, and root-zone moisture anomalies to alert tiers (**Normal**, **Watch**, **Warning**, **Critical**).
+5. **Interactive Analytics:** Time-series trends, correlation matrix heatmaps, seasonal rainfall cycles, and OpenStreetMap spatial risk visualization.
+
+---
+
+## 2. System Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    DroughtSense Frontend                     │
+│  React 19 • Vite • TypeScript • Tailwind CSS • Recharts      │
+│  React Leaflet OpenStreetMap • Lucide Icons • React Router   │
+└──────────────────────────────▲───────────────────────────────┘
+                               │ HTTP / JSON REST APIs
+┌──────────────────────────────▼───────────────────────────────┐
+│                     FastAPI Backend                          │
+│  FastAPI • Pydantic V2 • Uvicorn • SQLAlchemy ORM            │
+├──────────────────────────────┬───────────────────────────────┤
+│    Statistical Indices       │     Machine Learning Core     │
+│   • SPI (Gamma + Thom MLE)   │   • Random Forest Classifier  │
+│   • SPEI (GEV / Water Bal.)  │   • XGBoost Ensemble          │
+│   • PET (Thornthwaite)       │   • Decision Tree & LogReg    │
+├──────────────────────────────┼───────────────────────────────┤
+│    Data Quality Control      │      Early-Warning Rules      │
+│   • Anti-Formula Injection   │   • Multi-Threshold Mapping   │
+│   • IQR Outlier Screening    │   • Actionable Advisories     │
+└──────────────────────────────▲───────────────────────────────┘
+                               │
+┌──────────────────────────────▼───────────────────────────────┐
+│                     SQLite Database                          │
+│  Datasets • Locations • Records • Models • Predictions       │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 3. Drought Index Methodology
+
+### 3.1 Standardized Precipitation Index (SPI)
+SPI measures precipitation anomalies over a moving window $k$ (e.g., 3-month rolling sum) against a fitted 2-parameter Gamma distribution:
+
+$$f(x; \alpha, \beta) = \frac{1}{\beta^\alpha \Gamma(\alpha)} x^{\alpha - 1} e^{-x/\beta}, \quad x > 0$$
+
+Where:
+- $\alpha$ (shape) and $\beta$ (scale) are fitted via Maximum Likelihood Estimation (MLE) or Thom's approximation.
+- To account for zero-rainfall periods ($x = 0$), cumulative probability is adjusted:
+  
+  $$H(x) = q + (1 - q) G(x)$$
+  
+  where $q$ is the empirical probability of zero precipitation and $G(x)$ is the cumulative Gamma distribution.
+- $H(x)$ is mapped to standard normal quantiles: $Z = \Phi^{-1}(H(x))$.
+
+### 3.2 Standardized Precipitation Evapotranspiration Index (SPEI)
+SPEI incorporates evaporative atmospheric demand by analyzing the climatic water balance:
+
+$$D_i = P_i - \text{PET}_i$$
+
+- Potential Evapotranspiration ($\text{PET}$) is computed via the Thornthwaite (1948) or Hargreaves-Samani method based on temperature and latitude.
+- Aggregated water balance $D$ is fitted to Generalized Extreme Value (GEV) and Pearson Type III distributions, accounting for negative deficits.
+
+### 3.3 Severity Classification Convention
+
+| SPI / SPEI Range | Severity Class | Visual Badge | Indicator Meaning |
+| :--- | :--- | :--- | :--- |
+| $\ge -0.99$ | **Normal** | `Green` | Near-normal moisture or surplus |
+| $-1.00 \text{ to } -1.49$ | **Moderate** | `Amber` | Mild moisture deficit; early soil drying |
+| $-1.50 \text{ to } -1.99$ | **Severe** | `Orange` | Substantial precipitation deficit; crop stress |
+| $\le -2.00$ | **Extreme** | `Red` | Critical water balance collapse; emergency |
+
+---
+
+## 4. Application Pages
+
+The application is structured into 9 dedicated pages:
+
+1. **Overview Dashboard (`/`):** Summary cards (Drought Probability, Severity, Rainfall, Soil Moisture, SPI/SPEI, Early Warning Status), interactive trend graphs, and recent activity logs.
+2. **Drought Prediction (`/prediction`):** Manual input form (Method A) with input validation and batch dataset inference (Method B) with feature factor breakdown and mitigation advisories.
+3. **Environmental Data (`/data`):** CSV/Excel file upload, automated column detection, data quality report (missing values, duplicates, outliers), and single-click demo data ingestion.
+4. **Drought Risk Map (`/map`):** Interactive OpenStreetMap with color-coded severity markers, station popups, and severity filtering.
+5. **Trends & Analytics (`/analytics`):** Multi-year environmental curves, seasonal rainfall bar charts, and a Pearson correlation heatmap matrix.
+6. **Model Performance (`/models`):** Training trigger with chronological train/test split, model comparison matrix, confusion matrix, and feature importance chart.
+7. **Prediction History (`/history`):** Complete persistent audit trail with keyword search, multi-factor filtering, pagination, snapshot inspection, and CSV export.
+8. **Settings (`/settings`):** Configurable thresholds for drought severity and early-warning alerts, measurement unit preferences, and demo mode settings.
+9. **About Project (`/about`):** Academic course details (EHDS-2026 Project 1), team credentials, mathematical formulas, and scientific disclaimers.
+
+---
+
+## 5. Getting Started & Installation
+
+### Prerequisites
+- **Python 3.11+** installed
+- **Node.js v18+** & **npm** installed
+- Git
+
+### Step 1: Clone Repository
+```bash
+git clone https://github.com/your-username/DroughtSense.git
+cd DroughtSense
+```
+
+### Step 2: Backend Setup
+```bash
+# Navigate to backend and install dependencies
+cd backend
+python -m pip install -r requirements.txt
+
+# Run backend development server
+python run.py
+```
+*The FastAPI backend will start at `http://localhost:8000`. Automatic API documentation is accessible at `http://localhost:8000/docs`.*
+
+### Step 3: Frontend Setup
+In a new terminal window:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*The Vite React frontend will start at `http://localhost:5173`.*
+
+---
+
+## 6. Running Automated Tests
+
+The repository includes a suite of unit and integration tests covering the SPI/SPEI mathematical calculations, data validation pipelines, ML training ensembles, and REST API endpoints.
+
+```bash
+# Run pytest from the repository root
+python -m pytest backend/tests -v
+```
+
+**Verification Results:**
+- `test_spi_spei.py`: Validates Gamma fitting, zero-rainfall adjustments, and SPEI water balance.
+- `test_data_processor.py`: Verifies column auto-detection, formula injection sanitization, and IQR outlier screening.
+- `test_ml_pipeline.py`: Validates chronological train/test split, scaling fit, metrics, and artifact serialization.
+- `test_api.py`: Validates health check, analytics summary, prediction generation, and CSV export.
+
+---
+
+## 7. Docker Deployment
+
+To launch the full system using Docker and Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+---
+
+## 8. Academic & Scientific Disclaimer
+
+> **Notice:** DroughtSense is an academic research platform developed for Course EHDS-2026 Project 1. Predictions generated by this system represent statistical probabilities derived from the supplied meteorological variables and do not constitute official statutory weather forecasts or government disaster declarations. Ground truth operational validation requires localized station calibration and high-density telemetry.
