@@ -1,0 +1,20 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: droughtsense-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:////app/backend/droughtsense.db
+      - PROJECT_NAME=DroughtSense
+    volumes:
+      - ./backend/saved_models:/app/backend/saved_models
+      - ./backend/uploads:/app/backend/uploads
+      - ./data:/app/backend/data
+    restart: unless-stopped
+
+networks:
+  default:
+    name: droughtsense-network
