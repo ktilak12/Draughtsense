@@ -114,6 +114,13 @@ export const api = {
     return handleResponse<PredictionResult>(res);
   },
 
+  predictBatch: async (datasetId: number): Promise<{ status: string; dataset_id: number; predictions_generated: number; message: string }> => {
+    const res = await fetch(`${API_BASE}/predictions/batch/${datasetId}`, {
+      method: 'POST'
+    });
+    return handleResponse<{ status: string; dataset_id: number; predictions_generated: number; message: string }>(res);
+  },
+
   exportPredictionsCsvUrl: `${API_BASE}/predictions/export/csv`,
 
   // Datasets

@@ -164,8 +164,22 @@ def process_dataset(dataset_id: int, db: Session = Depends(get_db)):
         location = db.query(Location).filter(Location.name == str(loc_name)).first()
         if not location:
             # Check if lat/long present in group
-            lat = float(group_df["latitude"].iloc[0]) if "latitude" in group_df.columns else 20.5937
-            lon = float(group_df["longitude"].iloc[0]) if "longitude" in group_df.columns else 78.9629
+            lat_col = mapping.get("latitude")
+            lon_col = mapping.get("longitude")
+            
+            def safe_coord(col, default_val):
+                if col and col in group_df.columns:
+                    val = group_df[col].iloc[0]
+                    try:
+                        f = float(val)
+                        if not pd.isna(f):
+                            return f
+                    except (ValueError, TypeError):
+                        pass
+                return default_val
+
+            lat = safe_coord(lat_col, 20.5937)
+            lon = safe_coord(lon_col, 78.9629)
             location = Location(
                 name=str(loc_name),
                 latitude=lat,
@@ -203,6 +217,17 @@ def process_dataset(dataset_id: int, db: Session = Depends(get_db)):
             
             spei_series, _ = DroughtIndexCalculator.calculate_spei(p_series, pet_series, scale=3)
 
+        def safe_val(col_name):
+            if col_name and col_name in row:
+                val = row[col_name]
+                try:
+                    f = float(val)
+                    if not pd.isna(f):
+                        return f
+                except (ValueError, TypeError):
+                    pass
+            return None
+
         for idx, row in sorted_group.iterrows():
             spi_val = spi_series.loc[idx] if idx in spi_series.index and not pd.isna(spi_series.loc[idx]) else None
             spei_val = spei_series.loc[idx] if idx in spei_series.index and not pd.isna(spei_series.loc[idx]) else None
@@ -217,15 +242,15 @@ def process_dataset(dataset_id: int, db: Session = Depends(get_db)):
                 dataset_id=dataset.id,
                 location_id=location.id,
                 observation_date=row["standard_date"].strftime("%Y-%m-%d"),
-                rainfall=float(row[mapping["rainfall"]]) if mapping.get("rainfall") and mapping["rainfall"] in row and not pd.isna(row[mapping["rainfall"]]) else None,
-                temp_min=float(row[mapping["temp_min"]]) if mapping.get("temp_min") and mapping["temp_min"] in row and not pd.isna(row[mapping["temp_min"]]) else None,
-                temp_max=float(row[mapping["temp_max"]]) if mapping.get("temp_max") and mapping["temp_max"] in row and not pd.isna(row[mapping["temp_max"]]) else None,
-                temp_avg=float(row[mapping["temp_avg"]]) if mapping.get("temp_avg") and mapping["temp_avg"] in row and not pd.isna(row[mapping["temp_avg"]]) else None,
-                humidity=float(row[mapping["humidity"]]) if mapping.get("humidity") and mapping["humidity"] in row and not pd.isna(row[mapping["humidity"]]) else None,
-                wind_speed=float(row[mapping["wind_speed"]]) if mapping.get("wind_speed") and mapping["wind_speed"] in row and not pd.isna(row[mapping["wind_speed"]]) else None,
-                soil_moisture=float(row[mapping["soil_moisture"]]) if mapping.get("soil_moisture") and mapping["soil_moisture"] in row and not pd.isna(row[mapping["soil_moisture"]]) else None,
-                streamflow=float(row[mapping["streamflow"]]) if mapping.get("streamflow") and mapping["streamflow"] in row and not pd.isna(row[mapping["streamflow"]]) else None,
-                evapotranspiration=float(row[mapping["evapotranspiration"]]) if mapping.get("evapotranspiration") and mapping["evapotranspiration"] in row and not pd.isna(row[mapping["evapotranspiration"]]) else None,
+                rainfall=safe_val(mapping.get("rainfall")),
+                temp_min=safe_val(mapping.get("temp_min")),
+                temp_max=safe_val(mapping.get("temp_max")),
+                temp_avg=safe_val(mapping.get("temp_avg")),
+                humidity=safe_val(mapping.get("humidity")),
+                wind_speed=safe_val(mapping.get("wind_speed")),
+                soil_moisture=safe_val(mapping.get("soil_moisture")),
+                streamflow=safe_val(mapping.get("streamflow")),
+                evapotranspiration=safe_val(mapping.get("evapotranspiration")),
                 spi=spi_val,
                 spei=spei_val,
                 severity_label=sev_label

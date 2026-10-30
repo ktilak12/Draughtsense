@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
@@ -74,7 +74,7 @@ def train_model(
         features_json=json.dumps(metadata["features"]),
         target_definition="Drought Severity (Normal, Moderate, Severe, Extreme) derived from SPI-3",
         training_dataset_name=f"Dataset #{payload.dataset_id}" if payload.dataset_id else "All Active Datasets",
-        training_timestamp=datetime.utcnow(),
+        training_timestamp=datetime.now(timezone.utc),
         evaluation_metrics_json=json.dumps(metadata["metrics"]),
         feature_importance_json=json.dumps(metadata["feature_importance"]),
         artifact_path=artifact_path,
@@ -85,11 +85,12 @@ def train_model(
     db.refresh(model_record)
 
     # Record training run
+    now_utc = datetime.now(timezone.utc)
     run = TrainingRun(
         model_id=model_record.id,
         status="COMPLETED",
-        started_timestamp=datetime.utcnow(),
-        completed_timestamp=datetime.utcnow(),
+        started_timestamp=now_utc,
+        completed_timestamp=now_utc,
         evaluation_summary_json=json.dumps(metadata["metrics"])
     )
     db.add(run)

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
@@ -13,28 +14,11 @@ from app.api.endpoints.models import train_model
 # Initialize SQLite database schema
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    description="A Machine Learning-Based Framework for Drought Prediction and Early Warning Using Hydrological and Meteorological Data.",
-    version=settings.PROJECT_VERSION
-)
-
-# CORS configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Include central API router
-app.include_router(api_router, prefix=settings.API_V1_STR)
-
-@app.on_event("startup")
-def startup_db_seed():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """
-    On initial boot, seed the demo dataset and train initial baseline models if database has no records.
+    Lifespan context manager for startup and shutdown events.
+    Seeds the demo dataset and trains the initial baseline model if database has no records.
     """
     db = SessionLocal()
     try:
@@ -60,6 +44,26 @@ def startup_db_seed():
                     print(f"[DroughtSense Startup] Initial model train notice: {e}")
     finally:
         db.close()
+    yield
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    description="A Machine Learning-Based Framework for Drought Prediction and Early Warning Using Hydrological and Meteorological Data.",
+    version=settings.PROJECT_VERSION,
+    lifespan=lifespan
+)
+
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include central API router
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():

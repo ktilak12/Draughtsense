@@ -15,7 +15,8 @@ from typing import Dict, Any, Tuple, List, Optional
 class DataProcessor:
     EXPECTED_FIELDS = [
         "date", "rainfall", "temp_min", "temp_max", "temp_avg",
-        "humidity", "wind_speed", "soil_moisture", "streamflow", "evapotranspiration", "location"
+        "humidity", "wind_speed", "soil_moisture", "streamflow", "evapotranspiration", "location",
+        "latitude", "longitude"
     ]
 
     FIELD_SYNONYMS = {
@@ -29,7 +30,9 @@ class DataProcessor:
         "soil_moisture": ["soil_moisture", "sm", "soil_moist", "moisture", "volumetric_soil_water"],
         "streamflow": ["streamflow", "discharge", "flow", "river_discharge", "runoff"],
         "evapotranspiration": ["evapotranspiration", "pet", "et0", "et", "potential_et"],
-        "location": ["location", "station", "station_name", "region", "site", "city"]
+        "location": ["location", "station", "station_name", "region", "site", "city"],
+        "latitude": ["latitude", "lat", "y_coord", "y"],
+        "longitude": ["longitude", "lon", "long", "x_coord", "x"]
     }
 
     @classmethod
@@ -100,7 +103,7 @@ class DataProcessor:
             return False, {
                 "total_rows": total_rows,
                 "valid_rows": 0,
-                "missing_values": df.isnull().sum().to_dict(),
+                "missing_values": {str(k): int(v) for k, v in df.isnull().sum().to_dict().items()},
                 "duplicate_rows": int(df.duplicated().sum()),
                 "outlier_counts": {},
                 "invalid_dates": 0,
@@ -168,6 +171,9 @@ class DataProcessor:
         clean_df = clean_df.sort_values(by='standard_date')
 
         valid_rows = len(clean_df)
+        if valid_rows == 0:
+            errors.append("No valid records remain after parsing dates.")
+        
         validation_status = "INVALID" if len(errors) > 0 else ("WARNING" if len(warnings) > 0 else "VALID")
 
         report = {

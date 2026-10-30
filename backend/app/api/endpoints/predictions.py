@@ -1,15 +1,16 @@
+import os
 import json
 import csv
 import io
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models.db_models import PredictionRecord, MLModel, Location, EnvironmentalRecord
+from app.models.db_models import PredictionRecord, MLModel, Location, EnvironmentalRecord, Dataset
 from app.schemas.schemas import ManualPredictionRequest, PredictionResponse, PredictionExplanation
 from app.services.ml_pipeline import DroughtMLPipeline
 from app.services.early_warning import EarlyWarningEngine
@@ -144,7 +145,7 @@ def create_prediction(payload: ManualPredictionRequest, db: Session = Depends(ge
         input_snapshot_json=json.dumps(input_dict),
         explanation_json=json.dumps(explanation.model_dump()),
         threshold_config_json=json.dumps(EarlyWarningEngine.DEFAULT_THRESHOLDS),
-        created_timestamp=datetime.utcnow()
+        created_timestamp=datetime.now(timezone.utc)
     )
     db.add(prediction_record)
     db.commit()
@@ -261,5 +262,110 @@ def export_predictions_csv(db: Session = Depends(get_db)):
     return Response(
         content=csv_data,
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=droughtsense_predictions_{datetime.utcnow().strftime('%Y%m%d')}.csv"}
+        headers={"Content-Disposition": f"attachment; filename=droughtsense_predictions_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv"}
     )
+
+@router.post("/batch/{dataset_id}")
+def batch_predict_dataset(dataset_id: int, db: Session = Depends(get_db)):
+    """
+    Generate batch drought predictions across all environmental observations in an uploaded dataset.
+    """
+    dataset = db.query(Dataset).filter(Dataset.id == dataset_id).first()
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+
+    records = db.query(EnvironmentalRecord).filter(EnvironmentalRecord.dataset_id == dataset_id).all()
+    if not records:
+        raise HTTPException(status_code=400, detail="Dataset has no processed environmental records. Please process the dataset first.")
+
+    active_model = db.query(MLModel).filter(MLModel.is_active == True).first()
+    model_artifact = active_model.artifact_path if (active_model and active_model.artifact_path and os.path.exists(active_model.artifact_path)) else None
+
+    predictions_created = []
+    now = datetime.now(timezone.utc)
+
+    for r in records:
+        loc = db.query(Location).filter(Location.id == r.location_id).first()
+        loc_name = loc.name if loc else "Station"
+
+        input_dict = {
+            "rainfall": r.rainfall,
+            "temp_min": r.temp_min,
+            "temp_max": r.temp_max,
+            "temp_avg": r.temp_avg,
+            "humidity": r.humidity,
+            "wind_speed": r.wind_speed,
+            "soil_moisture": r.soil_moisture,
+            "streamflow": r.streamflow,
+            "evapotranspiration": r.evapotranspiration,
+            "spi": r.spi,
+            "spei": r.spei
+        }
+
+        drought_prob = None
+        primary_factors = []
+        if model_artifact:
+            try:
+                drought_prob, severity, ml_exp = DroughtMLPipeline.predict_single(model_artifact, input_dict)
+                model_name = active_model.model_name
+                model_ver = active_model.version
+                primary_factors = ml_exp.get("primary_factors", [])
+            except Exception:
+                drought_prob = None
+
+        if drought_prob is None:
+            model_name = "WMO/McKee Empirical Index Engine"
+            model_ver = "v1.0-RuleFallback"
+            p_score = 15.0
+            if r.spi is not None:
+                if r.spi <= -2.0:
+                    p_score = 88.0
+                elif r.spi <= -1.5:
+                    p_score = 68.0
+                elif r.spi <= -1.0:
+                    p_score = 45.0
+            elif r.rainfall is not None and r.rainfall < 20.0:
+                p_score = 60.0
+            drought_prob = p_score
+            severity = r.severity_label or "Normal"
+
+        warning_status, _, advisories = EarlyWarningEngine.evaluate(
+            drought_prob=drought_prob,
+            spi=r.spi,
+            spei=r.spei,
+            soil_moisture=r.soil_moisture,
+            rainfall=r.rainfall
+        )
+
+        explanation = {
+            "primary_factors": primary_factors,
+            "suggested_actions": advisories,
+            "limitations": "Academic batch prediction evaluation."
+        }
+
+        pred_rec = PredictionRecord(
+            location_id=r.location_id,
+            location_name=loc_name,
+            prediction_date=r.observation_date,
+            drought_probability=drought_prob,
+            severity=severity,
+            warning_status=warning_status,
+            model_name=model_name,
+            model_version=model_ver,
+            input_snapshot_json=json.dumps(input_dict),
+            explanation_json=json.dumps(explanation),
+            threshold_config_json=json.dumps(EarlyWarningEngine.DEFAULT_THRESHOLDS),
+            created_timestamp=now
+        )
+        predictions_created.append(pred_rec)
+
+    db.bulk_save_objects(predictions_created)
+    db.commit()
+
+    return {
+        "status": "SUCCESS",
+        "dataset_id": dataset_id,
+        "dataset_name": dataset.name,
+        "predictions_generated": len(predictions_created),
+        "message": f"Successfully generated {len(predictions_created)} batch predictions using {model_name}."
+    }

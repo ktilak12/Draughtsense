@@ -3,13 +3,16 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, 
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
+def utcnow():
+    return datetime.datetime.now(datetime.timezone.utc)
+
 class Dataset(Base):
     __tablename__ = "datasets"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     file_type = Column(String(50), nullable=False)
-    upload_timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    upload_timestamp = Column(DateTime, default=utcnow)
     row_count = Column(Integer, default=0)
     date_range_start = Column(String(50), nullable=True)
     date_range_end = Column(String(50), nullable=True)
@@ -74,7 +77,7 @@ class MLModel(Base):
     features_json = Column(Text, nullable=False)             # JSON list of features used
     target_definition = Column(String(255), nullable=False)
     training_dataset_name = Column(String(255), nullable=True)
-    training_timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    training_timestamp = Column(DateTime, default=utcnow)
     evaluation_metrics_json = Column(Text, nullable=True)    # JSON metrics: accuracy, precision, recall, f1, auc, cm
     feature_importance_json = Column(Text, nullable=True)    # JSON dict of feature importances
     artifact_path = Column(String(500), nullable=True)
@@ -89,7 +92,7 @@ class TrainingRun(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     model_id = Column(Integer, ForeignKey("ml_models.id"), nullable=True)
     status = Column(String(50), default="STARTED")           # STARTED, RUNNING, COMPLETED, FAILED
-    started_timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    started_timestamp = Column(DateTime, default=utcnow)
     completed_timestamp = Column(DateTime, nullable=True)
     error_details = Column(Text, nullable=True)
     evaluation_summary_json = Column(Text, nullable=True)
@@ -112,7 +115,7 @@ class PredictionRecord(Base):
     input_snapshot_json = Column(Text, nullable=False)       # JSON of raw input values
     explanation_json = Column(Text, nullable=True)           # Contributing factors & suggested actions
     threshold_config_json = Column(Text, nullable=True)      # Threshold rules at prediction time
-    created_timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    created_timestamp = Column(DateTime, default=utcnow)
 
     location = relationship("Location", back_populates="predictions")
 
@@ -123,4 +126,4 @@ class AppSetting(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     setting_key = Column(String(100), unique=True, nullable=False)
     setting_value_json = Column(Text, nullable=False)
-    updated_timestamp = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    updated_timestamp = Column(DateTime, default=utcnow, onupdate=utcnow)

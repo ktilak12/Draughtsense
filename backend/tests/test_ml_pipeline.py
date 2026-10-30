@@ -51,3 +51,7 @@ def test_ml_pipeline_train_and_predict(tmp_path):
     assert 0.0 <= prob <= 100.0
     assert severity in ["Normal", "Moderate", "Severe", "Extreme"]
     assert "primary_factors" in explanation
+
+    # Clean up test artifact
+    if os.path.exists(artifact_path):
+        os.remove(artifact_path)

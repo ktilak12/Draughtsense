@@ -60,11 +60,16 @@ export const AnalyticsPage: React.FC = () => {
   const monthlyAgg: Record<number, { count: number; totalRain: number; avgTemp: number }> = {};
   trends.forEach((t) => {
     if (!t.date) return;
-    const m = parseInt(t.date.split('-')[1], 10);
-    if (!monthlyAgg[m]) monthlyAgg[m] = { count: 0, totalRain: 0, avgTemp: 0 };
-    monthlyAgg[m].count += 1;
-    monthlyAgg[m].totalRain += t.rainfall || 0;
-    monthlyAgg[m].avgTemp += t.temp_avg || 0;
+    const parts = t.date.split('-');
+    if (parts.length >= 2) {
+      const m = parseInt(parts[1], 10);
+      if (!isNaN(m) && m >= 1 && m <= 12) {
+        if (!monthlyAgg[m]) monthlyAgg[m] = { count: 0, totalRain: 0, avgTemp: 0 };
+        monthlyAgg[m].count += 1;
+        monthlyAgg[m].totalRain += t.rainfall || 0;
+        monthlyAgg[m].avgTemp += t.temp_avg || 0;
+      }
+    }
   });
 
   const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -72,7 +77,7 @@ export const AnalyticsPage: React.FC = () => {
     const m = parseInt(key, 10);
     const item = monthlyAgg[m];
     return {
-      month: MONTH_NAMES[m - 1],
+      month: MONTH_NAMES[m - 1] || `M${m}`,
       avgRainfall: item.count > 0 ? +(item.totalRain / item.count).toFixed(1) : 0,
       avgTemperature: item.count > 0 ? +(item.avgTemp / item.count).toFixed(1) : 0
     };

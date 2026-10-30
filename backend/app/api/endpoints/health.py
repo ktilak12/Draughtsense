@@ -5,7 +5,7 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.models.db_models import MLModel
 from app.schemas.schemas import HealthResponse
-from datetime import datetime
+from datetime import datetime, timezone
 
 router = APIRouter()
 
@@ -23,7 +23,7 @@ def check_health(db: Session = Depends(get_db)):
     return HealthResponse(
         status="ok",
         version=settings.PROJECT_VERSION,
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         database=db_status,
         active_model=active_model_name
     )

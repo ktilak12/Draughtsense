@@ -59,3 +59,16 @@ def test_prediction_history_and_export():
     export_response = client.get("/api/predictions/export/csv")
     assert export_response.status_code == 200
     assert "text/csv" in export_response.headers["content-type"]
+
+def test_batch_prediction():
+    # Fetch existing datasets
+    ds_resp = client.get("/api/datasets")
+    assert ds_resp.status_code == 200
+    datasets = ds_resp.json()
+    if datasets:
+        ds_id = datasets[0]["id"]
+        resp = client.post(f"/api/predictions/batch/{ds_id}")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "SUCCESS"
+        assert "predictions_generated" in data

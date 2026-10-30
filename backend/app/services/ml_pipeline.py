@@ -15,7 +15,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from typing import Dict, Any, Tuple, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -196,7 +196,7 @@ class DroughtMLPipeline:
         }
 
         # Save artifacts
-        timestamp_str = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         version = f"v_{timestamp_str}"
         model_filename = f"{algorithm.replace(' ', '_').lower()}_{version}.joblib"
         artifact_path = os.path.join(settings.MODEL_DIR, model_filename)
@@ -257,6 +257,7 @@ class DroughtMLPipeline:
         X_scaled = scaler.transform(X_imp)
 
         # Predict
+        proba = None
         if "xgboost" in bundle.get("algorithm", "").lower():
             pred_encoded = model.predict(X_scaled)[0]
             severity = classes[int(pred_encoded)] if int(pred_encoded) < len(classes) else "Moderate"

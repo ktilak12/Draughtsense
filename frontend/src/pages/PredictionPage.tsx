@@ -50,6 +50,8 @@ export const PredictionPage: React.FC = () => {
   const [spei, setSpei] = useState<string>('-1.55');
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [batchLoading, setBatchLoading] = useState<boolean>(false);
+  const [batchResult, setBatchResult] = useState<string | null>(null);
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
@@ -493,15 +495,26 @@ export const PredictionPage: React.FC = () => {
           <div>
             <h3 className="font-bold text-slate-900 text-sm">Method B: Batch Predictions via Dataset</h3>
             <p className="text-xs text-slate-500">
-              Select an uploaded hydrometeorological dataset to run inference across all observations.
+              Select an uploaded hydrometeorological dataset to run inference across all observations using the active model.
             </p>
           </div>
+
+          {batchResult && (
+            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center space-x-2">
+              <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{batchResult}</span>
+            </div>
+          )}
 
           <div className="max-w-md space-y-3">
             <label className="block text-xs font-semibold text-slate-700">Select Uploaded Dataset</label>
             <select
               value={selectedDatasetId}
-              onChange={(e) => setSelectedDatasetId(e.target.value ? parseInt(e.target.value) : '')}
+              onChange={(e) => {
+                setSelectedDatasetId(e.target.value ? parseInt(e.target.value) : '');
+                setBatchResult(null);
+                setErrorMsg(null);
+              }}
               className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
             >
               <option value="">-- Choose Dataset --</option>
@@ -513,15 +526,25 @@ export const PredictionPage: React.FC = () => {
             </select>
 
             <button
-              onClick={() => {
-                if (selectedDatasetId) {
-                  alert(`Batch prediction job queued for dataset #${selectedDatasetId}. Results saved to History.`);
+              onClick={async () => {
+                if (!selectedDatasetId) return;
+                try {
+                  setBatchLoading(true);
+                  setErrorMsg(null);
+                  setBatchResult(null);
+                  const res = await api.predictBatch(selectedDatasetId as number);
+                  setBatchResult(`${res.message} View all records in the Prediction History tab.`);
+                } catch (err: any) {
+                  setErrorMsg(err.message || 'Batch prediction failed.');
+                } finally {
+                  setBatchLoading(false);
                 }
               }}
-              disabled={!selectedDatasetId}
-              className="px-4 py-2.5 bg-emerald-800 text-white rounded-xl text-xs font-bold hover:bg-emerald-900 transition-colors disabled:opacity-50 cursor-pointer"
+              disabled={!selectedDatasetId || batchLoading}
+              className="px-4 py-2.5 bg-emerald-800 text-white rounded-xl text-xs font-bold hover:bg-emerald-900 transition-colors disabled:opacity-50 cursor-pointer flex items-center space-x-2"
             >
-              Run Batch Dataset Predictions
+              <BrainCircuit className="w-3.5 h-3.5" />
+              <span>{batchLoading ? 'Generating Batch Inference...' : 'Run Batch Dataset Predictions'}</span>
             </button>
           </div>
         </div>

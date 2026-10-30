@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -37,7 +37,7 @@ def get_settings(db: Session = Depends(get_db)):
         new_row = AppSetting(
             setting_key="global_config",
             setting_value_json=json.dumps(DEFAULT_CONFIG),
-            updated_timestamp=datetime.utcnow()
+            updated_timestamp=datetime.now(timezone.utc)
         )
         db.add(new_row)
         db.commit()
@@ -54,7 +54,7 @@ def update_settings(payload: SettingsPayload, db: Session = Depends(get_db)):
         db.add(setting_row)
 
     setting_row.setting_value_json = json.dumps(payload.model_dump())
-    setting_row.updated_timestamp = datetime.utcnow()
+    setting_row.updated_timestamp = datetime.now(timezone.utc)
     db.commit()
 
     return payload
