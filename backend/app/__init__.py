@@ -1,0 +1,1 @@
+"""DroughtSense backend application package."""

@@ -59,6 +59,52 @@ The platform provides a functional end-to-end pipeline:
 
 ---
 
+### 2.1 Repository & Directory Structure
+
+```text
+DroughtSense/
+├── backend/                        # FastAPI application core
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── endpoints/          # REST route controllers (analytics, datasets, health, models, predictions, settings)
+│   │   │   └── router.py           # Central APIRouter aggregation
+│   │   ├── core/                   # Application settings & database engine configuration
+│   │   ├── models/                 # SQLAlchemy database schema models
+│   │   ├── schemas/                # Pydantic request & response schemas
+│   │   ├── services/               # Core analytical, SPI/SPEI, and ML pipelines
+│   │   └── main.py                 # FastAPI application entrypoint & startup seed
+│   ├── data/                       # Hydrometeorological training and benchmark datasets
+│   ├── saved_models/               # Serialized model artifacts (.joblib)
+│   ├── tests/                      # Automated unit and integration test suite
+│   ├── uploads/                    # Temporary staged upload directory
+│   ├── requirements.txt            # Python dependencies
+│   └── run.py                      # Local development runner
+├── frontend/                       # Vite + React 19 + TypeScript frontend
+│   ├── public/                     # Static assets and icons
+│   ├── src/
+│   │   ├── assets/                 # Brand assets and graphics
+│   │   ├── components/layout/      # Common navigation, sidebar, and layout shell
+│   │   ├── pages/                  # 9 dedicated analytical & dashboard views
+│   │   ├── services/               # Frontend API client and backend integration
+│   │   ├── types/                  # TypeScript domain models and interfaces
+│   │   ├── App.tsx                 # Client-side router table
+│   │   ├── index.css               # Tailwind CSS theme design tokens
+│   │   └── main.tsx                # React DOM root entrypoint
+│   ├── package.json                # Frontend dependencies and scripts
+│   ├── tsconfig.json               # TypeScript compiler configuration
+│   └── vite.config.ts              # Vite bundler and reverse proxy configuration
+├── scripts/                        # Repository validation and tooling utilities
+├── .dockerignore                   # Docker build context exclusion rules
+├── .env.example                    # Environment variable configuration template
+├── .gitignore                      # Git ignore specifications
+├── Dockerfile                      # Multi-stage production container definition
+├── docker-compose.yml              # Container orchestration configuration
+├── LICENSE                         # MIT License
+└── README.md                       # Comprehensive platform documentation
+```
+
+---
+
 ## 3. Drought Index Methodology
 
 ### 3.1 Standardized Precipitation Index (SPI)
